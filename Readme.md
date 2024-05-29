@@ -116,3 +116,128 @@ const user = {
 console.log(user["full name"]);
 user["display info"]();
 ```
+
+
+
+
+
+
+
+
+
+
+# Глобальный контекст и объект globalThis
+
+## В глобальном контексте this ссылается на глобальный объект. Что такое "глобальный объект" в JavaScript? Это зависит от среды, в которой выполняется код. Так, в веб-браузере this представляет объект window - объект, который представляет окно браузера. В среде Node.js this представляет объект global. А для веб-воркеров this представляет объект self
+
+## Например, в веб-браузере при выполнении следующего кода:
+
+```js
+console.log(this);
+```
+
+### мы получим консольный вывод вроде следующего
+
+### Window {window: Window, self: Window, document: document, name: "", location: Location, …}
+
+### В стандарт ES2020 было добавлено определение объекта globalThis, который позволяет ссылаться на глобальный конекст вне зависимости, в какой среде и в какой ситуации выполняется код:
+
+```js
+console.log(globalThis);
+```
+
+## Контекст функции
+
+### В пределах функции this ссылается на внешний контекст. Для функций, определенных в глобальном контексте, - это объект globalThis. Например:
+
+```js
+function foo(){
+    var bar = "local";
+    console.log(this.bar);
+}
+ 
+var bar = "global";
+ 
+foo();  // global
+```
+
+### Если бы мы не использовали бы this, то обращение шло бы к локальной переменной, определенной внутри функции.
+
+```js
+function foo(){
+    var bar = "local";
+    console.log(bar);
+}
+ 
+var bar = "global";
+ 
+foo();  // local
+```
+
+### Но если бы мы использовали строгий режим (strict mode), то this в этом случае имело бы значение undefined:
+
+```js
+"use strict";
+function foo(){
+    var bar = "local";
+    console.log(this.bar);
+}
+ 
+var bar = "global";
+ 
+foo();  // ошибка - this - undefined
+```
+
+## Контекст объекта
+
+### В контексте объекта, в том числе в его методах, ключевое слово this ссылается на этот же объект:
+
+```js
+const obj = {
+    bar: "object",
+    foo: function(){
+        console.log(this.bar);
+    }
+}
+var bar = "global";
+obj.foo();  // object
+```
+
+## Динамическое определение контекста
+
+### Код функции всегда использует в качестве this внешний контекст, в которым этот код вызывается (именно вызывается, а не определяется). Рассмотрим более сложный пример:
+
+```js
+function foo(){
+    var bar = "foo_bar";
+    console.log(this.bar);
+}
+  
+const obj1 = {bar:"obj1_bar", foo: foo};
+const obj2 = {bar:"obj2_bar", foo: foo};
+  
+var bar = "global_bar";
+  
+foo();  // global_bar
+obj1.foo();   // obj1_bar
+obj2.foo();   // obj2_bar
+```
+
+## Контекст во вложенных функциях
+
+### Если мы вызываем функцию из другой функции, вызываемая функция также будет использовать внешний контекст:
+
+```js
+var bar = "global bar";
+  
+function foo(){
+    var bar = "foo bar";
+    function moo(){
+          
+        console.log(this.bar);
+    }
+    moo();
+}
+foo();  // global bar
+```
+
